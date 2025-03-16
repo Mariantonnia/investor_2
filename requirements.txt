@@ -1,0 +1,12 @@
+streamlit
+gspread
+oauth2client
+langchain
+langchain_groq
+matplotlib
+pandas
+python-dotenv
+vaderSentiment
+langchain_community
+gspread
+oauth2client
