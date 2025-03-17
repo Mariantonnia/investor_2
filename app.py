@@ -111,7 +111,17 @@ else:
     client = gspread.authorize(creds)
     
     sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
-    fila = st.session_state.reacciones[:]
-    fila.extend([puntuaciones.get("Ambiental", 0), puntuaciones.get("Social", 0), puntuaciones.get("Gobernanza", 0), puntuaciones.get("Riesgo", 0)])
+    # Construir una sola fila con todas las respuestas
+    fila = st.session_state.reacciones[:]  # Solo guardar las reacciones
+    
+    # Agregar las puntuaciones al final
+    fila.extend([
+        puntuaciones["Ambiental"],
+        puntuaciones["Social"],
+        puntuaciones["Gobernanza"],
+        puntuaciones["Riesgo"]
+    ])
+    
+    # Agregar la fila a Google Sheets
     sheet.append_row(fila)
     st.success("Respuestas y perfil guardados en Google Sheets en una misma fila.")
