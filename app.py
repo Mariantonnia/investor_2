@@ -133,7 +133,7 @@ else:
     client = gspread.authorize(creds)
     
     # Abrir la hoja de cálculo
-    sheet = client.open('BBDD_RESPUESTAS').sheet2
+    sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
 
     # Construir una sola fila con toda la información
     fila = []
