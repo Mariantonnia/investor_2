@@ -73,7 +73,7 @@ if st.session_state.contador < len(noticias):
         st.rerun()
 else:
     # Calcular puntuaciones ESG basándose en los titulares específicos
-    puntuaciones = {"Ambiental": 50, "Social": 50, "Gobernanza": 50, "Riesgo": 50}
+    puntuaciones = {}
     
     for categoria, indices in indices_esg.items():
         valores = []
@@ -84,12 +84,7 @@ else:
         
         if valores:
             promedio_sentimiento = sum(valores) / len(valores)
-            if promedio_sentimiento < -0.2:
-                puntuaciones[categoria] = 80
-            elif promedio_sentimiento > 0.2:
-                puntuaciones[categoria] = 40
-            else:
-                puntuaciones[categoria] = 60
+            puntuaciones[categoria] = ((promedio_sentimiento + 1) / 2) * 100  # Escalar a 0-100
     
     st.write(f"**Perfil del inversor:** {puntuaciones}")
     
