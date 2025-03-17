@@ -84,7 +84,7 @@ else:
         
         if valores:
             promedio_sentimiento = sum(valores) / len(valores)
-            puntuaciones[categoria] = (promedio_sentimiento + 1) * 50 # Escalar a 0-100
+            puntuaciones[categoria] = promedio_sentimiento #(promedio_sentimiento + 1) * 50 # Escalar a 0-100
     
     st.write(f"**Perfil del inversor:** {puntuaciones}")
     
