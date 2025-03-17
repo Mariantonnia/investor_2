@@ -122,15 +122,24 @@ else:
     # Abrir la hoja de cálculo
     sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
 
-    # Construir una lista de listas para asegurarnos de que cada dato va en su celda correcta
-    filas = [[titular, reaccion] for titular, reaccion in zip(st.session_state.titulares, st.session_state.reacciones)]
+   # Construir una sola fila con toda la información
+fila = []
+
+for i in range(len(st.session_state.titulares)):
+    fila.append(st.session_state.titulares[i])  # Agregar titular
+    fila.append(st.session_state.reacciones[i])  # Agregar reacción
+
+    # Agregar las puntuaciones ESG y Riesgo al final
+    fila.extend([
+        puntuaciones["Ambiental"],
+        puntuaciones["Social"],
+        puntuaciones["Gobernanza"],
+        puntuaciones["Riesgo"]
+    ])
     
-    # Agregar una fila de puntuaciones al final
-    filas.append(["Ambiental", "Social", "Gobernanza", "Riesgo"])
-    filas.append(list(puntuaciones.values()))
+    # Agregar la fila a Google Sheets
+    sheet.append_row(fila)
 
     # Subir datos a Google Sheets
-    sheet.append_rows(filas)
-
     st.success("Respuestas y perfil guardados en Google Sheets correctamente.")
 
