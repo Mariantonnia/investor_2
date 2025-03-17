@@ -38,27 +38,17 @@ noticias = [
 # Inicializar el analizador de sentimientos de VADER
 analyzer = SentimentIntensityAnalyzer()
 
-# Función para obtener sentimiento
 def obtener_sentimiento(texto):
     sentimiento = analyzer.polarity_scores(texto)
     return sentimiento
 
-# Plantilla y cadena para análisis de reacciones
-plantilla_reaccion = """
-Reacción del inversor: {reaccion}
-Analiza el sentimiento y la preocupación expresada:
-"""
-prompt_reaccion = PromptTemplate(template=plantilla_reaccion, input_variables=["reaccion"])
-cadena_reaccion = LLMChain(llm=llm, prompt=prompt_reaccion)
-
-plantilla_perfil = """
-Análisis de reacciones: {analisis}
-Genera un perfil detallado del inversor basado en sus reacciones, enfocándote en los pilares ESG (Ambiental, Social y Gobernanza) y su aversión al riesgo. 
-Asigna una puntuación de 0 a 100 para cada pilar ESG y para el riesgo, donde 0 indica ninguna preocupación y 100 máxima preocupación o aversión.
-Devuelve las 4 puntuaciones en formato: Ambiental: [puntuación], Social: [puntuación], Gobernanza: [puntuación], Riesgo: [puntuación]
-"""
-prompt_perfil = PromptTemplate(template=plantilla_perfil, input_variables=["analisis"])
-cadena_perfil = LLMChain(llm=llm, prompt=prompt_perfil)
+# Definir los índices de las preguntas para cada categoría
+indices_esg = {
+    "Ambiental": [0, 5],
+    "Social": [1, 6],
+    "Gobernanza": [2, 8],
+    "Riesgo": [3, 4, 8]
+}
 
 if "contador" not in st.session_state:
     st.session_state.contador = 0
@@ -75,77 +65,56 @@ if st.session_state.contador < len(noticias):
     reaccion = st.text_input(f"¿Cuál es tu reacción a esta noticia?", key=f"reaccion_{st.session_state.contador}")
 
     if reaccion:
-        # Analizar sentimiento de la reacción
         sentimiento = obtener_sentimiento(reaccion)
         st.write(f"**Análisis de Sentimiento:** {sentimiento}")
         
-        # Basado en el sentimiento, ajustar las puntuaciones ESG y Riesgo
-        # Si el sentimiento es negativo, podemos aumentar el riesgo y disminuir el puntaje ESG
-        if sentimiento['compound'] < -0.2:
-            puntuaciones = {"Ambiental": 70, "Social": 60, "Gobernanza": 65, "Riesgo": 85}
-        elif sentimiento['compound'] > 0.2:
-            puntuaciones = {"Ambiental": 40, "Social": 40, "Gobernanza": 50, "Riesgo": 30}
-        else:
-            puntuaciones = {"Ambiental": 55, "Social": 50, "Gobernanza": 60, "Riesgo": 50}
-
         st.session_state.reacciones.append(reaccion)
         st.session_state.contador += 1
         st.rerun()
 else:
-    # Análisis de todas las reacciones
-    analisis_total = ""
-    for titular, reaccion in zip(st.session_state.titulares, st.session_state.reacciones):
-        analisis_reaccion = cadena_reaccion.run(reaccion=reaccion)
-        analisis_total += analisis_reaccion + "\n"
-
-    perfil = cadena_perfil.run(analisis=analisis_total)
-    st.write(f"**Perfil del inversor:** {perfil}")
+    # Calcular puntuaciones ESG basándose en los titulares específicos
+    puntuaciones = {"Ambiental": 50, "Social": 50, "Gobernanza": 50, "Riesgo": 50}
     
-    # Extraer puntuaciones del perfil con expresiones regulares
-    puntuaciones = {
-        "Ambiental": int(re.search(r"Ambiental: (\d+)", perfil).group(1)),
-        "Social": int(re.search(r"Social: (\d+)", perfil).group(1)),
-        "Gobernanza": int(re.search(r"Gobernanza: (\d+)", perfil).group(1)),
-        "Riesgo": int(re.search(r"Riesgo: (\d+)", perfil).group(1)),
-    }
-
-    # Crear gráfico de barras
+    for categoria, indices in indices_esg.items():
+        valores = []
+        for i in indices:
+            if i < len(st.session_state.reacciones):
+                sentimiento = obtener_sentimiento(st.session_state.reacciones[i])
+                valores.append(sentimiento['compound'])
+        
+        if valores:
+            promedio_sentimiento = sum(valores) / len(valores)
+            if promedio_sentimiento < -0.2:
+                puntuaciones[categoria] = 80
+            elif promedio_sentimiento > 0.2:
+                puntuaciones[categoria] = 40
+            else:
+                puntuaciones[categoria] = 60
+    
+    st.write(f"**Perfil del inversor:** {puntuaciones}")
+    
     categorias = list(puntuaciones.keys())
     valores = list(puntuaciones.values())
-
+    
     fig, ax = plt.subplots()
     ax.bar(categorias, valores)
     ax.set_ylabel("Puntuación (0-100)")
     ax.set_title("Perfil del Inversor")
     st.pyplot(fig)
-
+    
     try:
-        # Cargar credenciales de Google Sheets
         creds_json_str = st.secrets["gcp_service_account"]
         creds_json = json.loads(creds_json_str)
     except Exception as e:
         st.error(f"Error al cargar las credenciales: {e}")
         st.stop()
     
-    # Autorización con Google Sheets
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
     client = gspread.authorize(creds)
     
-    # Abrir la hoja de cálculo
     sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
-
-    # Construir una sola fila con todas las respuestas
-    fila = st.session_state.reacciones[:]  # Solo guardar las reacciones
-    
-    # Agregar las puntuaciones al final
-    fila.extend([
-        puntuaciones["Ambiental"],
-        puntuaciones["Social"],
-        puntuaciones["Gobernanza"],
-        puntuaciones["Riesgo"]
-    ])
-    
-    # Agregar la fila a Google Sheets
+    fila = st.session_state.reacciones[:]
+    fila.extend([puntuaciones["Ambiental"], puntuaciones["Social"], puntuaciones["Gobernanza"], puntuaciones["Riesgo"]])
     sheet.append_row(fila)
     st.success("Respuestas y perfil guardados en Google Sheets en una misma fila.")
