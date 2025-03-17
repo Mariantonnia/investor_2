@@ -76,15 +76,17 @@ else:
     puntuaciones = {}
     
     for categoria, indices in indices_esg.items():
-        valores = []
+        valores = {"pos": [], "neu": [], "neg": []}
         for i in indices:
             if i < len(st.session_state.reacciones):
                 sentimiento = obtener_sentimiento(st.session_state.reacciones[i])
-                valores.append(sentimiento['compound'])
+                valores["pos"].append(sentimiento['pos'])
+                valores["neu"].append(sentimiento['neu'])
+                valores["neg"].append(sentimiento['neg'])
         
-        if valores:
-            promedio_sentimiento = sum(valores) / len(valores)
-            puntuaciones[categoria] = promedio_sentimiento #(promedio_sentimiento + 1) * 50 # Escalar a 0-100
+        if valores["pos"] or valores["neg"]:
+            puntuacion = ((sum(valores["pos"]) - sum(valores["neg"])) / (len(valores["pos"]) + len(valores["neg"]) + 1)) * 100
+            puntuaciones[categoria] = max(0, min(100, puntuacion))  # Escalar dentro del rango 0-100
     
     st.write(f"**Perfil del inversor:** {puntuaciones}")
     
@@ -110,6 +112,6 @@ else:
     
     sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
     fila = st.session_state.reacciones[:]
-    fila.extend([puntuaciones["Ambiental"], puntuaciones["Social"], puntuaciones["Gobernanza"], puntuaciones["Riesgo"]])
+    fila.extend([puntuaciones.get("Ambiental", 0), puntuaciones.get("Social", 0), puntuaciones.get("Gobernanza", 0), puntuaciones.get("Riesgo", 0)])
     sheet.append_row(fila)
     st.success("Respuestas y perfil guardados en Google Sheets en una misma fila.")
