@@ -153,3 +153,4 @@ else:
     sheet.append_row(fila)
 
     st.success("Respuestas y perfil guardados en Google Sheets en una misma fila.")
+
