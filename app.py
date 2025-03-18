@@ -81,8 +81,8 @@ else:
                 valores["neg"].append(sentimiento['neg'])
         
         if valores["pos"] or valores["neg"]:
-            #puntuacion = (sum(valores["pos"]) / (sum(valores["pos"]) + sum(valores["neg"]) + 0.0001)) * 100
-            puntuaciones[categoria] = max(0, min(100, valores["pos"]))
+            puntuacion = valores["pos"] #(sum(valores["pos"]) / (sum(valores["pos"]) + sum(valores["neg"]) + 0.0001)) * 100
+            puntuaciones[categoria] = max(0, min(100, puntuacion))
     
     st.write(f"**Perfil del inversor:** {valores["pos"]}")
     
