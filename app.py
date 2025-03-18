@@ -1,13 +1,10 @@
 import streamlit as st
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from langchain import LLMChain, PromptTemplate
 from langchain_groq import ChatGroq
 import os
-import re
-import matplotlib.pyplot as plt
-import pandas as pd
 import json
+import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
@@ -39,10 +36,8 @@ noticias = [
 analyzer = SentimentIntensityAnalyzer()
 
 def obtener_sentimiento(texto):
-    sentimiento = analyzer.polarity_scores(texto)
-    return sentimiento
+    return analyzer.polarity_scores(texto)
 
-# Definir los índices de las preguntas para cada categoría
 indices_esg = {
     "Ambiental": [0, 5],
     "Social": [1, 6],
@@ -61,32 +56,33 @@ if st.session_state.contador < len(noticias):
     noticia = noticias[st.session_state.contador]
     st.session_state.titulares.append(noticia)
     st.write(f"**Titular:** {noticia}")
-
+    
     reaccion = st.text_input(f"¿Cuál es tu reacción a esta noticia?", key=f"reaccion_{st.session_state.contador}")
-
+    
     if reaccion:
-        sentimiento = obtener_sentimiento(reaccion)
+        texto_analizar = noticia + " " + reaccion  # Combinar titular y reacción
+        sentimiento = obtener_sentimiento(texto_analizar)
         st.write(f"**Análisis de Sentimiento:** {sentimiento}")
         
         st.session_state.reacciones.append(reaccion)
         st.session_state.contador += 1
         st.rerun()
 else:
-    # Calcular puntuaciones ESG basándose en los titulares específicos
     puntuaciones = {}
     
     for categoria, indices in indices_esg.items():
         valores = {"pos": [], "neu": [], "neg": []}
         for i in indices:
             if i < len(st.session_state.reacciones):
-                sentimiento = obtener_sentimiento(st.session_state.reacciones[i])
+                texto_analizar = noticias[i] + " " + st.session_state.reacciones[i]
+                sentimiento = obtener_sentimiento(texto_analizar)
                 valores["pos"].append(sentimiento['pos'])
                 valores["neu"].append(sentimiento['neu'])
                 valores["neg"].append(sentimiento['neg'])
         
         if valores["pos"] or valores["neg"]:
-            puntuacion = ((sum(valores["pos"]) - sum(valores["neg"])) / (len(valores["pos"]) + len(valores["neg"]) + 1)) * 100
-            puntuaciones[categoria] = max(0, min(100, puntuacion))  # Escalar dentro del rango 0-100
+            puntuacion = (sum(valores["pos"]) / (sum(valores["pos"]) + sum(valores["neg"]) + 0.0001)) * 100
+            puntuaciones[categoria] = max(0, min(100, puntuacion))
     
     st.write(f"**Perfil del inversor:** {puntuaciones}")
     
@@ -111,17 +107,7 @@ else:
     client = gspread.authorize(creds)
     
     sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
-    # Construir una sola fila con todas las respuestas
-    fila = st.session_state.reacciones[:]  # Solo guardar las reacciones
-    
-    # Agregar las puntuaciones al final
-    fila.extend([
-        puntuaciones["Ambiental"],
-        puntuaciones["Social"],
-        puntuaciones["Gobernanza"],
-        puntuaciones["Riesgo"]
-    ])
-    
-    # Agregar la fila a Google Sheets
+    fila = st.session_state.reacciones[:]
+    fila.extend([puntuaciones.get("Ambiental", 0), puntuaciones.get("Social", 0), puntuaciones.get("Gobernanza", 0), puntuaciones.get("Riesgo", 0)])
     sheet.append_row(fila)
     st.success("Respuestas y perfil guardados en Google Sheets en una misma fila.")
