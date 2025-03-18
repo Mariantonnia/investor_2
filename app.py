@@ -82,7 +82,7 @@ else:
         
         if valores["pos"] or valores["neg"]:
             #puntuacion = (sum(valores["pos"]) / (sum(valores["pos"]) + sum(valores["neg"]) + 0.0001)) * 100
-            puntuaciones[categoria] = max(0, min(100, puntuacion))
+            puntuaciones[categoria] = max(0, min(100, valores["pos"]))
     
     st.write(f"**Perfil del inversor:** {valores["pos"]}")
     
@@ -111,3 +111,4 @@ else:
     fila.extend([puntuaciones.get("Ambiental", 0), puntuaciones.get("Social", 0), puntuaciones.get("Gobernanza", 0), puntuaciones.get("Riesgo", 0)])
     sheet.append_row(fila)
     st.success("Respuestas y perfil guardados en Google Sheets en una misma fila.")
+
