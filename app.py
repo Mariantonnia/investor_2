@@ -63,26 +63,25 @@ else:
         # Calcular puntuaciones según el compound score
         for i, sentimiento in st.session_state.reacciones.items():
             compound = sentimiento['compound']
-            #normalized_score = (compound * 100)  # Normalizar de -1 a 1 en 0 a 100
 
             if i in [0, 5]:  # Ambiental (E)
-                e_scores.append(1-compound)
+                e_scores.append(100 - normalizar_puntuacion(compound))
             elif i in [1, 6]:  # Social (S)
-                s_scores.append(compound)
+                s_scores.append(normalizar_puntuacion(compound))
             elif i in [2, 7]:  # Gobernanza (G)
-                g_scores.append(1-compound)
+                g_scores.append(100 - normalizar_puntuacion(compound))
             elif i in [3, 4, 8]:  # Riesgo (R)
-                r_scores.append(1 - compound)  # Riesgo alto si la reacción es negativa
+                r_scores.append(100 - normalizar_puntuacion(compound))
 
         # Normalizar, redondear y limitar valores entre 0 y 100
         if e_scores:
-            puntuaciones["Ambiental"] = max(0, min(100, round(sum((e_scores+1)*50) / len(e_scores))))
+            puntuaciones["Ambiental"] = max(0, min(100, round(sum(e_scores) / len(e_scores))))
         if s_scores:
-            puntuaciones["Social"] = max(0, min(100, round(sum((s_scores+1)*50) / len(s_scores))))
+            puntuaciones["Social"] = max(0, min(100, round(sum(s_scores) / len(s_scores))))
         if g_scores:
-            puntuaciones["Gobernanza"] = max(0, min(100, round(sum((g_scores+1)*50) / len(g_scores))))
+            puntuaciones["Gobernanza"] = max(0, min(100, round(sum(g_scores) / len(g_scores))))
         if r_scores:
-            puntuaciones["Riesgo"] = max(0, min(100, round(sum((r_scores+1)*50) / len(r_scores))))
+            puntuaciones["Riesgo"] = max(0, min(100, round(sum(r_scores) / len(r_scores))))
 
     # Mostrar resultados
     st.write("**Perfil del Inversor:**")
