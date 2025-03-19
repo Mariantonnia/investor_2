@@ -61,16 +61,16 @@ else:
         g_scores = []
         r_scores = []
 
-        # Calcular puntuaciones según la nueva lógica
+        # Calcular puntuaciones según la nueva lógica, incluyendo 'neg'
         for i, sentimiento in st.session_state.reacciones.items():
             if i in [0, 5]:  # Ambiental (E)
-                e_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
+                e_scores.append(sentimiento['neg'] - sentimiento['pos'])  # Negativo = puntuación alta
             elif i in [1, 6]:  # Social (S)
-                s_scores.append(sentimiento['pos'])  # Positivo = puntuación alta
+                s_scores.append(sentimiento['pos'] - sentimiento['neg'])  # Positivo = puntuación alta
             elif i in [2, 7]:  # Gobernanza (G)
-                g_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
+                g_scores.append(sentimiento['neg'] - sentimiento['pos'])  # Negativo = puntuación alta
             elif i in [3, 4, 8]:  # Riesgo (R)
-                r_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
+                r_scores.append(sentimiento['neg'] - sentimiento['pos'])  # Negativo = puntuación alta
 
         # Normalizar y redondear valores
         if e_scores:
