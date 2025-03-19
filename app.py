@@ -107,15 +107,18 @@ else:
         r_scores = []
         # Calcular puntuaciones según el compound score
         for i, sentimiento in st.session_state.reacciones.items():
-            compound = sentimiento['sentimiento']['compound']
-            if i in [0, 5]:  # Ambiental (E)
-                e_scores.append(asignar_puntuacion(compound, "Ambiental"))
-            elif i in [1, 6]:  # Social (S)
-                s_scores.append(asignar_puntuacion(compound, "Social"))
-            elif i in [2, 7]:  # Gobernanza (G)
-                g_scores.append(asignar_puntuacion(compound, "Gobernanza"))
-            elif i in [3, 4, 8]:  # Riesgo (R)
-                r_scores.append(asignar_puntuacion(compound, "Riesgo"))
+            if isinstance(sentimiento, dict) and 'sentimiento' in sentimiento: #Comprobación añadida.
+                compound = sentimiento['sentimiento']['compound']
+                if i in [0, 5]:  # Ambiental (E)
+                    e_scores.append(asignar_puntuacion(compound, "Ambiental"))
+                elif i in [1, 6]:  # Social (S)
+                    s_scores.append(asignar_puntuacion(compound, "Social"))
+                elif i in [2, 7]:  # Gobernanza (G)
+                    g_scores.append(asignar_puntuacion(compound, "Gobernanza"))
+                elif i in [3, 4, 8]:  # Riesgo (R)
+                    r_scores.append(asignar_puntuacion(compound, "Riesgo"))
+            else:
+                print(f"Advertencia: No se encontró 'sentimiento' en la reacción {i}") #Añadimos un print para debug.
         # Calcular promedios
         if e_scores:
             puntuaciones["Ambiental"] = round(sum(e_scores) / len(e_scores))
