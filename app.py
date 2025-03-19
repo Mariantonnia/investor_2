@@ -44,7 +44,6 @@ if st.session_state.contador < len(noticias):
     reaccion = st.text_input("¿Cuál es tu reacción a esta noticia?", key=f"reaccion_{st.session_state.contador}")
     
     if reaccion:
-        #texto_analizar = noticia + " " + reaccion
         texto_analizar = reaccion
         sentimiento = obtener_sentimiento(texto_analizar)
         st.write(f"**Análisis de Sentimiento:** {sentimiento}")
@@ -61,30 +60,31 @@ else:
         g_scores = []
         r_scores = []
 
-        # Calcular puntuaciones según la nueva lógica
+        # Calcular puntuaciones según el compound score
         for i, sentimiento in st.session_state.reacciones.items():
+            compound = sentimiento['compound']
+            normalized_score = (compound + 1) / 2 * 100  # Normalizar de -1 a 1 en 0 a 100
+
             if i in [0, 5]:  # Ambiental (E)
-                e_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
+                e_scores.append(normalized_score)
             elif i in [1, 6]:  # Social (S)
-                s_scores.append(sentimiento['pos'])  # Positivo = puntuación alta
+                s_scores.append(normalized_score)
             elif i in [2, 7]:  # Gobernanza (G)
-                g_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
+                g_scores.append(normalized_score)
             elif i in [3, 4, 8]:  # Riesgo (R)
-                r_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
+                r_scores.append(100 - normalized_score)  # Riesgo alto si la reacción es negativa
 
         # Normalizar y redondear valores
         if e_scores:
-            puntuaciones["Ambiental"] = round(max(0, min(100, (sum(e_scores) / len(e_scores)) * 100)))
+            puntuaciones["Ambiental"] = round(sum(e_scores) / len(e_scores))
         if s_scores:
-            puntuaciones["Social"] = round(max(0, min(100, (sum(s_scores) / len(s_scores)) * 100)))
+            puntuaciones["Social"] = round(sum(s_scores) / len(s_scores))
         if g_scores:
-            puntuaciones["Gobernanza"] = round(max(0, min(100, (sum(g_scores) / len(g_scores)) * 100)))
+            puntuaciones["Gobernanza"] = round(sum(g_scores) / len(g_scores))
         if r_scores:
-            puntuaciones["Riesgo"] = round(max(0, min(100, (sum(r_scores) / len(r_scores)) * 100)))
+            puntuaciones["Riesgo"] = round(sum(r_scores) / len(r_scores))
 
-    # Resto del código para mostrar y guardar resultados...
-
-
+    # Mostrar resultados
     st.write("**Perfil del Inversor:**")
     for categoria, puntaje in puntuaciones.items():
         st.write(f"{categoria}: {puntaje}")
