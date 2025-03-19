@@ -44,7 +44,8 @@ if st.session_state.contador < len(noticias):
     reaccion = st.text_input("¿Cuál es tu reacción a esta noticia?", key=f"reaccion_{st.session_state.contador}")
     
     if reaccion:
-        texto_analizar = noticia + " " + reaccion
+        #texto_analizar = noticia + " " + reaccion
+        texto_analizar = reaccion
         sentimiento = obtener_sentimiento(texto_analizar)
         st.write(f"**Análisis de Sentimiento:** {sentimiento}")
         
