@@ -146,26 +146,18 @@ else:
 
  # Guardar en Google Sheets
 
-    try:
-
-        creds_json_str = st.secrets["gcp_service_account"]
-
-        creds_json = json.loads(creds_json_str)
-
-        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
-
-        client = gspread.authorize(creds)
-
-        sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
-
-        fila = [puntuaciones.get(cat, 50) for cat in ["Ambiental", "Social", "Gobernanza", "Riesgo"]]
-
-        sheet.append_row(fila)
-
-        st.success("Respuestas y perfil guardados en Google Sheets.")
-
-    except Exception as e:
-
-        st.error(f"Error al guardar en Google Sheets: {e}")
+try:
+    creds_json_str = st.secrets["gcp_service_account"]
+    creds_json = json.loads(creds_json_str)
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
+    client = gspread.authorize(creds)
+    sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
+    fila = [puntuaciones.get(cat, 50) for cat in ["Ambiental", "Social", "Gobernanza", "Riesgo"]]
+    # Añadir las reacciones a la fila
+    reacciones_lista = [st.session_state.reacciones.get(i, {}).get('compound', 'Sin reacción') for i in range(len(noticias))]
+    fila.extend(reacciones_lista)
+    sheet.append_row(fila)
+    st.success("Respuestas y perfil guardados en Google Sheets.")
+except Exception as e:
+    st.error(f"Error al guardar en Google Sheets: {e}")
