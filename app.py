@@ -38,7 +38,7 @@ indices_esg = {
 # Inicializar session state
 if "contador" not in st.session_state:
     st.session_state.contador = 0
-    st.session_state.reacciones = []
+    st.session_state.reacciones = {cat: [] for cat in indices_esg.keys()}
 
 title = "Análisis de Sentimiento de Inversores"
 st.title(title)
@@ -55,23 +55,24 @@ if st.session_state.contador < len(noticias):
         sentimiento = obtener_sentimiento(texto_analizar)
         st.write(f"**Análisis de Sentimiento:** {sentimiento}")
         
-        st.session_state.reacciones.append(sentimiento)
+        for categoria, indices in indices_esg.items():
+            if st.session_state.contador in indices:
+                st.session_state.reacciones[categoria].append(sentimiento)
+        
         st.session_state.contador += 1
         st.rerun()
 else:
     puntuaciones = {}
     
-    for categoria, indices in indices_esg.items():
-        valores_pos, valores_neg = [], []
-        
-        for i in indices:
-            if i < len(st.session_state.reacciones):
-                valores_pos.append(st.session_state.reacciones[i]['pos'])
-                valores_neg.append(st.session_state.reacciones[i]['neg'])
+    for categoria, sentimientos in st.session_state.reacciones.items():
+        valores_pos = [s['pos'] for s in sentimientos]
+        valores_neg = [s['neg'] for s in sentimientos]
         
         if valores_pos or valores_neg:
             puntuacion = (sum(valores_pos) / (sum(valores_pos) + sum(valores_neg) + 0.0001)) * 100
             puntuaciones[categoria] = round(max(0, min(100, puntuacion)), 2)
+        else:
+            puntuaciones[categoria] = 0
     
     st.write("**Perfil del Inversor:**")
     for categoria, puntaje in puntuaciones.items():
