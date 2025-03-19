@@ -18,13 +18,13 @@ def obtener_sentimiento(texto):
 def asignar_puntuacion(compound, categoria):
     """Asigna puntuaciones basadas en el compound score y la categoría."""
     if categoria in ["Ambiental", "Gobernanza", "Riesgo"]:
-        if compound <= -0.05:
+        if compound <= -0.03:
             return 100
-        elif compound <= -0.04:
+        elif compound <= -0.025:
             return 90
-        elif compound <= -0.03:
-            return 80
         elif compound <= -0.02:
+            return 80
+        elif compound <= -0.015:
             return 70
         elif compound <= -0.01:
             return 60
@@ -41,15 +41,15 @@ def asignar_puntuacion(compound, categoria):
         else:
             return 0
     elif categoria == "Social":
-        if compound >= 0.05:
+        if compound >= 0.025:
             return 100
-        elif compound >= 0.04:
-            return 90
-        elif compound >= 0.03:
-            return 80
         elif compound >= 0.02:
-            return 70
+            return 90
+        elif compound >= 0.015:
+            return 80
         elif compound >= 0.01:
+            return 70
+        elif compound >= 0.05:
             return 60
         elif compound >= 0:
             return 50
