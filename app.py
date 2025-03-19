@@ -15,6 +15,10 @@ analyzer = SentimentIntensityAnalyzer()
 def obtener_sentimiento(texto):
     return analyzer.polarity_scores(texto)
 
+def normalizar_puntuacion(compound):
+    """Normaliza el compound score de -1 a 1 a una escala de 0 a 100."""
+    return (compound + 1) * 50
+
 # Noticias
 noticias = [
     "Repsol, entre las 50 empresas que más responsabilidad histórica tienen en el calentamiento global",
