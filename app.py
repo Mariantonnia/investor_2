@@ -65,11 +65,10 @@ else:
     puntuaciones = {}
     
     for categoria, sentimientos in st.session_state.reacciones.items():
-        valores_pos = [s['pos'] for s in sentimientos]
-        valores_neg = [s['neg'] for s in sentimientos]
-        
-        if valores_pos or valores_neg:
-            puntuacion = (sum(valores_pos) / (sum(valores_pos) + sum(valores_neg) + 0.0001)) * 100
+        if sentimientos:
+            valores_pos = sum(s['pos'] for s in sentimientos)
+            valores_neg = sum(s['neg'] for s in sentimientos)
+            puntuacion = (valores_pos / (valores_pos + valores_neg + 0.0001)) * 100
             puntuaciones[categoria] = round(max(0, min(100, puntuacion)), 2)
         else:
             puntuaciones[categoria] = 0
