@@ -58,7 +58,7 @@ else:
         # Calcular puntuaciones según la lógica definida
         e_scores = [st.session_state.reacciones[i]['pos'] - st.session_state.reacciones[i]['neg'] for i in [0, 5] if i in st.session_state.reacciones]
         s_scores = [st.session_state.reacciones[i]['pos'] - st.session_state.reacciones[i]['neg'] for i in [1, 6] if i in st.session_state.reacciones]
-        g_scores = [-st.session_state.reacciones[2]['neg'] + st.session_state.reacciones[8]['pos']] if 2 in st.session_state.reacciones and 8 in st.session_state.reacciones else []
+        g_scores = [st.session_state.reacciones[i]['pos'] + st.session_state.reacciones[i]['neg'] for i in [2, 8] if i in st.session_state.reacciones]
         r_scores = [1 - st.session_state.reacciones[i]['pos'] for i in [3, 4, 7] if i in st.session_state.reacciones]
         
         # Normalizar valores
