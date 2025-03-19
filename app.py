@@ -53,35 +53,35 @@ if st.session_state.contador < len(noticias):
         st.rerun()
 else:
     puntuaciones = {"Ambiental": 50, "Social": 50, "Gobernanza": 50, "Riesgo": 50}
-    
+
     if st.session_state.reacciones:
         # Calcular puntuaciones según la lógica definida
         e_scores = [st.session_state.reacciones[i]['pos'] - st.session_state.reacciones[i]['neg'] for i in [0, 5] if i in st.session_state.reacciones]
         s_scores = [st.session_state.reacciones[i]['pos'] - st.session_state.reacciones[i]['neg'] for i in [1, 6] if i in st.session_state.reacciones]
-        g_scores = [st.session_state.reacciones[i]['pos'] + st.session_state.reacciones[i]['neg'] for i in [2, 8] if i in st.session_state.reacciones]
+        g_scores = [-st.session_state.reacciones[2]['neg'] + st.session_state.reacciones[8]['pos']] if 2 in st.session_state.reacciones and 8 in st.session_state.reacciones else []
         r_scores = [1 - st.session_state.reacciones[i]['pos'] for i in [3, 4, 7] if i in st.session_state.reacciones]
-        
-        # Normalizar valores
+
+        # Normalizar y redondear valores
         if e_scores:
-            puntuaciones["Ambiental"] = max(0, min(100, (sum(e_scores) / len(e_scores)) * 100))
+            puntuaciones["Ambiental"] = round(max(0, min(100, (sum(e_scores) / len(e_scores)) * 100)))
         if s_scores:
-            puntuaciones["Social"] = max(0, min(100, (sum(s_scores) / len(s_scores)) * 100))
+            puntuaciones["Social"] = round(max(0, min(100, (sum(s_scores) / len(s_scores)) * 100)))
         if g_scores:
-            puntuaciones["Gobernanza"] = max(0, min(100, (sum(g_scores) / len(g_scores)) * 100))
+            puntuaciones["Gobernanza"] = round(max(0, min(100, (sum(g_scores) / len(g_scores)) * 100)))
         if r_scores:
-            puntuaciones["Riesgo"] = max(0, min(100, (sum(r_scores) / len(r_scores)) * 100))
-    
+            puntuaciones["Riesgo"] = round(max(0, min(100, (sum(r_scores) / len(r_scores)) * 100)))
+
     st.write("**Perfil del Inversor:**")
     for categoria, puntaje in puntuaciones.items():
         st.write(f"{categoria}: {puntaje}")
-    
+
     # Graficar
     fig, ax = plt.subplots()
     ax.bar(puntuaciones.keys(), puntuaciones.values(), color=['green', 'blue', 'purple', 'red'])
     ax.set_ylabel("Puntuación (0-100)")
     ax.set_title("Perfil del Inversor")
     st.pyplot(fig)
-    
+
     # Guardar en Google Sheets
     try:
         creds_json_str = st.secrets["gcp_service_account"]
