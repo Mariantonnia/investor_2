@@ -20,46 +20,46 @@ def asignar_puntuacion(compound, categoria):
     if categoria in ["Ambiental", "Gobernanza", "Riesgo"]:
         if compound <= -0.05:
             return 100
-        elif compound <= -0.045:
-            return 90
         elif compound <= -0.04:
-            return 80
-        elif compound <= -0.035:
-            return 70
+            return 90
         elif compound <= -0.03:
-            return 60
-        elif compound <= -0.025:
-            return 50
+            return 80
         elif compound <= -0.02:
-            return 40
-        elif compound <= -0.015:
-            return 30
+            return 70
         elif compound <= -0.01:
+            return 60
+        elif compound <= -0:
+            return 50
+        elif compound <= 0.1:
+            return 40
+        elif compound <= 0.2:
+            return 30
+        elif compound <= 0.4:
             return 20
-        elif compound <= -0.0:
+        elif compound <= 0.5:
             return 10
         else:
             return 0
     elif categoria == "Social":
         if compound >= 0.05:
             return 100
-        elif compound >= 0.045:
-            return 90
         elif compound >= 0.04:
-            return 80
-        elif compound >= 0.035:
-            return 70
+            return 90
         elif compound >= 0.03:
-            return 60
-        elif compound >= 0.025:
-            return 50
+            return 80
         elif compound >= 0.02:
-            return 40
-        elif compound >= 0.015:
-            return 30
+            return 70
         elif compound >= 0.01:
+            return 60
+        elif compound >= 0:
+            return 50
+        elif compound >= -0.01:
+            return 40
+        elif compound >= -0.02:
+            return 30
+        elif compound >= -0.03:
             return 20
-        elif compound >= 0.005:
+        elif compound >= -0.04:
             return 10
         else:
             return 0
