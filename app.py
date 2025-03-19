@@ -18,48 +18,48 @@ def obtener_sentimiento(texto):
 def asignar_puntuacion(compound, categoria):
     """Asigna puntuaciones basadas en el compound score y la categoría."""
     if categoria in ["Ambiental", "Gobernanza", "Riesgo"]:
-        if compound <= -0.1:
+        if compound <= -0.05:
             return 100
-        elif compound <= -0.09:
+        elif compound <= -0.045:
             return 90
-        elif compound <= -0.08:
-            return 80
-        elif compound <= -0.07:
-            return 70
-        elif compound <= -0.06:
-            return 60
-        elif compound <= -0.05:
-            return 50
         elif compound <= -0.04:
-            return 40
+            return 80
+        elif compound <= -0.035:
+            return 70
         elif compound <= -0.03:
-            return 30
+            return 60
+        elif compound <= -0.025:
+            return 50
         elif compound <= -0.02:
-            return 20
+            return 40
+        elif compound <= -0.015:
+            return 30
         elif compound <= -0.01:
+            return 20
+        elif compound <= -0.0:
             return 10
         else:
             return 0
     elif categoria == "Social":
-        if compound >= 0.1:
+        if compound >= 0.05:
             return 100
-        elif compound >= 0.09:
+        elif compound >= 0.045:
             return 90
-        elif compound >= 0.08:
-            return 80
-        elif compound >= 0.07:
-            return 70
-        elif compound >= 0.06:
-            return 60
-        elif compound >= 0.05:
-            return 50
         elif compound >= 0.04:
-            return 40
+            return 80
+        elif compound >= 0.035:
+            return 70
         elif compound >= 0.03:
-            return 30
+            return 60
+        elif compound >= 0.025:
+            return 50
         elif compound >= 0.02:
-            return 20
+            return 40
+        elif compound >= 0.015:
+            return 30
         elif compound >= 0.01:
+            return 20
+        elif compound >= 0.005:
             return 10
         else:
             return 0
