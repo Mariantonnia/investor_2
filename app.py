@@ -55,11 +55,21 @@ else:
     puntuaciones = {"Ambiental": 50, "Social": 50, "Gobernanza": 50, "Riesgo": 50}
 
     if st.session_state.reacciones:
-        # Calcular puntuaciones según la lógica definida
-        e_scores = [st.session_state.reacciones[i]['pos'] - st.session_state.reacciones[i]['neg'] for i in [0, 5] if i in st.session_state.reacciones]
-        s_scores = [st.session_state.reacciones[i]['pos'] - st.session_state.reacciones[i]['neg'] for i in [1, 6] if i in st.session_state.reacciones]
-        g_scores = [-st.session_state.reacciones[2]['neg'] + st.session_state.reacciones[8]['pos']] if 2 in st.session_state.reacciones and 8 in st.session_state.reacciones else []
-        r_scores = [1 - st.session_state.reacciones[i]['pos'] for i in [3, 4, 7] if i in st.session_state.reacciones]
+        e_scores = []
+        s_scores = []
+        g_scores = []
+        r_scores = []
+
+        # Calcular puntuaciones según la nueva lógica
+        for i, sentimiento in st.session_state.reacciones.items():
+            if i in [0, 5]:  # Ambiental (E)
+                e_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
+            elif i in [1, 6]:  # Social (S)
+                s_scores.append(sentimiento['pos'])  # Positivo = puntuación alta
+            elif i in [2, 7]:  # Gobernanza (G)
+                g_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
+            elif i in [3, 4, 8]:  # Riesgo (R)
+                r_scores.append(1 - sentimiento['pos'])  # Negativo = puntuación alta
 
         # Normalizar y redondear valores
         if e_scores:
@@ -70,6 +80,8 @@ else:
             puntuaciones["Gobernanza"] = round(max(0, min(100, (sum(g_scores) / len(g_scores)) * 100)))
         if r_scores:
             puntuaciones["Riesgo"] = round(max(0, min(100, (sum(r_scores) / len(r_scores)) * 100)))
+
+    # Resto del código para mostrar y guardar resultados...
 
     st.write("**Perfil del Inversor:**")
     for categoria, puntaje in puntuaciones.items():
