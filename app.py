@@ -66,11 +66,11 @@ else:
             normalized_score = (compound * 100)  # Normalizar de -1 a 1 en 0 a 100
 
             if i in [0, 5]:  # Ambiental (E)
-                e_scores.append(normalized_score)
+                e_scores.append(100-normalized_score)
             elif i in [1, 6]:  # Social (S)
                 s_scores.append(normalized_score)
             elif i in [2, 7]:  # Gobernanza (G)
-                g_scores.append(normalized_score)
+                g_scores.append(100-normalized_score)
             elif i in [3, 4, 8]:  # Riesgo (R)
                 r_scores.append(100 - normalized_score)  # Riesgo alto si la reacción es negativa
 
