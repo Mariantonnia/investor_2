@@ -54,34 +54,23 @@ if st.session_state.contador < len(noticias):
         st.rerun()
 else:
     puntuaciones = {"Ambiental": 50, "Social": 50, "Gobernanza": 50, "Riesgo": 50}
-
+    
     if st.session_state.reacciones:
-        e_scores = []
-        s_scores = []
-        g_scores = []
-        r_scores = []
-
-        # Calcular puntuaciones según la nueva lógica, incluyendo 'neg'
-        for i, sentimiento in st.session_state.reacciones.items():
-            if i in [0, 5]:  # Ambiental (E)
-                e_scores.append(sentimiento['neg'] - sentimiento['pos'])  # Negativo = puntuación alta
-            elif i in [1, 6]:  # Social (S)
-                s_scores.append(sentimiento['pos'] - sentimiento['neg'])  # Positivo = puntuación alta
-            elif i in [2, 7]:  # Gobernanza (G)
-                g_scores.append(sentimiento['neg'] - sentimiento['pos'])  # Negativo = puntuación alta
-            elif i in [3, 4, 8]:  # Riesgo (R)
-                r_scores.append(sentimiento['neg'] - sentimiento['pos'])  # Negativo = puntuación alta
-
-        # Normalizar y redondear valores
+        # Calcular puntuaciones según la lógica definida
+        e_scores = [-st.session_state.reacciones[i]['pos'] + st.session_state.reacciones[i]['neg'] for i in [0, 5] if i in st.session_state.reacciones]
+        s_scores = [st.session_state.reacciones[i]['pos'] - st.session_state.reacciones[i]['neg'] for i in [1, 6] if i in st.session_state.reacciones]
+        g_scores = [-st.session_state.reacciones[i]['pos'] + st.session_state.reacciones[i]['neg'] for i in [2, 7] if i in st.session_state.reacciones]
+        r_scores = [-st.session_state.reacciones[i]['pos'] + st.session_state.reacciones[i]['neg'] for i in [3,4,8] if i in st.session_state.reacciones]
+        
+        # Normalizar valores
         if e_scores:
-            puntuaciones["Ambiental"] = round(max(0, min(100, (sum(e_scores) / len(e_scores)) * 100)))
+            puntuaciones["Ambiental"] = max(0, min(100, (sum(e_scores) / len(e_scores)) * 100))
         if s_scores:
-            puntuaciones["Social"] = round(max(0, min(100, (sum(s_scores) / len(s_scores)) * 100)))
+            puntuaciones["Social"] = max(0, min(100, (sum(s_scores) / len(s_scores)) * 100))
         if g_scores:
-            puntuaciones["Gobernanza"] = round(max(0, min(100, (sum(g_scores) / len(g_scores)) * 100)))
+            puntuaciones["Gobernanza"] = max(0, min(100, (sum(g_scores) / len(g_scores)) * 100))
         if r_scores:
-            puntuaciones["Riesgo"] = round(max(0, min(100, (sum(r_scores) / len(r_scores)) * 100)))
-
+            puntuaciones["Riesgo"] = max(0, min(100, (sum(r_scores) / len(r_scores)) * 100))
     # Resto del código para mostrar y guardar resultados...
 
     st.write("**Perfil del Inversor:**")
