@@ -76,13 +76,13 @@ else:
 
         # Normalizar, redondear y limitar valores entre 0 y 100
         if e_scores:
-            puntuaciones["Ambiental"] = max(0, min(100, round(sum(e_scores*100) / len(e_scores))))
+            puntuaciones["Ambiental"] = max(0, min(100, round(sum(e_scores*50) / len(e_scores))))
         if s_scores:
-            puntuaciones["Social"] = max(0, min(100, round(sum(s_scores*100) / len(s_scores))))
+            puntuaciones["Social"] = max(0, min(100, round(sum(s_scores*50) / len(s_scores))))
         if g_scores:
-            puntuaciones["Gobernanza"] = max(0, min(100, round(sum(g_scores*100) / len(g_scores))))
+            puntuaciones["Gobernanza"] = max(0, min(100, round(sum(g_scores*50) / len(g_scores))))
         if r_scores:
-            puntuaciones["Riesgo"] = max(0, min(100, round(sum(r_scores*100) / len(r_scores))))
+            puntuaciones["Riesgo"] = max(0, min(100, round(sum(r_scores*50) / len(r_scores))))
 
     # Mostrar resultados
     st.write("**Perfil del Inversor:**")
