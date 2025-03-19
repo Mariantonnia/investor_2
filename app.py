@@ -73,7 +73,9 @@ else:
             puntuacion = (sum(valores_pos) / (sum(valores_pos) + sum(valores_neg) + 0.0001)) * 100
             puntuaciones[categoria] = round(max(0, min(100, puntuacion)), 2)
     
-    st.write("**Perfil del Inversor:**", puntuaciones)
+    st.write("**Perfil del Inversor:**")
+    for categoria, puntaje in puntuaciones.items():
+        st.write(f"{categoria}: {puntaje}")
     
     # Graficar
     fig, ax = plt.subplots()
@@ -90,8 +92,7 @@ else:
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
         client = gspread.authorize(creds)
         sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
-        fila = st.session_state.reacciones[:]
-        fila.extend([puntuaciones.get(cat, 0) for cat in ["Ambiental", "Social", "Gobernanza", "Riesgo"]])
+        fila = [puntuaciones.get(cat, 0) for cat in ["Ambiental", "Social", "Gobernanza", "Riesgo"]]
         sheet.append_row(fila)
         st.success("Respuestas y perfil guardados en Google Sheets.")
     except Exception as e:
