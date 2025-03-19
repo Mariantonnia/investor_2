@@ -147,34 +147,18 @@ else:
     # Guardar en Google Sheets
   
 try:
-        # Cargar credenciales de Google Sheets
         creds_json_str = st.secrets["gcp_service_account"]
         creds_json = json.loads(creds_json_str)
     except Exception as e:
         st.error(f"Error al cargar las credenciales: {e}")
         st.stop()
     
-    # Autorización con Google Sheets
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
     client = gspread.authorize(creds)
     
-    # Abrir la hoja de cálculo
-    sheet = client.open('BBDD_RESPUESTAS').sheet1
-
-    
-    # Construir una sola fila con todas las respuestas
-    fila = st.session_state.reacciones  # Solo guardar las reacciones
-    
-    # Agregar las puntuaciones al final
-    fila.extend([
-        puntuaciones["Ambiental"],
-        puntuaciones["Social"],
-        puntuaciones["Gobernanza"],
-        puntuaciones["Riesgo"]
-    ])
-    
-    # Agregar la fila a Google Sheets
+    sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
+    fila = st.session_state.reacciones[:]
+    fila.extend([puntuaciones.get("Ambiental", 0), puntuaciones.get("Social", 0), puntuaciones.get("Gobernanza", 0), puntuaciones.get("Riesgo", 0)])
     sheet.append_row(fila)
-
     st.success("Respuestas y perfil guardados en Google Sheets en una misma fila.")
