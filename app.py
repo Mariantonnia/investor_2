@@ -66,12 +66,12 @@ else:
     
     for categoria, sentimientos in st.session_state.reacciones.items():
         if sentimientos:
-            valores_pos = sum(s['pos'] for s in sentimientos)
-            valores_neg = sum(s['neg'] for s in sentimientos)
+            valores_pos = sum(s['pos'] for s in sentimientos) / len(sentimientos)
+            valores_neg = sum(s['neg'] for s in sentimientos) / len(sentimientos)
             puntuacion = (valores_pos / (valores_pos + valores_neg + 0.0001)) * 100
             puntuaciones[categoria] = round(max(0, min(100, puntuacion)), 2)
         else:
-            puntuaciones[categoria] = 0
+            puntuaciones[categoria] = 50  # Valor neutro si no hay datos
     
     st.write("**Perfil del Inversor:**")
     for categoria, puntaje in puntuaciones.items():
@@ -79,7 +79,7 @@ else:
     
     # Graficar
     fig, ax = plt.subplots()
-    ax.bar(puntuaciones.keys(), puntuaciones.values())
+    ax.bar(puntuaciones.keys(), puntuaciones.values(), color=['green', 'blue', 'purple', 'red'])
     ax.set_ylabel("Puntuación (0-100)")
     ax.set_title("Perfil del Inversor")
     st.pyplot(fig)
@@ -92,7 +92,7 @@ else:
         creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
         client = gspread.authorize(creds)
         sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
-        fila = [puntuaciones.get(cat, 0) for cat in ["Ambiental", "Social", "Gobernanza", "Riesgo"]]
+        fila = [puntuaciones.get(cat, 50) for cat in ["Ambiental", "Social", "Gobernanza", "Riesgo"]]
         sheet.append_row(fila)
         st.success("Respuestas y perfil guardados en Google Sheets.")
     except Exception as e:
