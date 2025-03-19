@@ -89,30 +89,25 @@ st.title(title)
 if st.session_state.contador < len(noticias):
     noticia = noticias[st.session_state.contador]
     st.write(f"**Titular:** {noticia}")
-    
     reaccion = st.text_input("¿Cuál es tu reacción a esta noticia?", key=f"reaccion_{st.session_state.contador}")
-    
     if reaccion:
         texto_analizar = reaccion
         sentimiento = obtener_sentimiento(texto_analizar)
         st.write(f"**Análisis de Sentimiento:** {sentimiento}")
-        
-        st.session_state.reacciones[st.session_state.contador] = sentimiento
+        # Guardar el texto completo y el sentimiento
+        st.session_state.reacciones[st.session_state.contador] = {"texto": reaccion, "sentimiento": sentimiento}
         st.session_state.contador += 1
         st.rerun()
 else:
     puntuaciones = {"Ambiental": 50, "Social": 50, "Gobernanza": 50, "Riesgo": 50}
-
     if st.session_state.reacciones:
         e_scores = []
         s_scores = []
         g_scores = []
         r_scores = []
-
         # Calcular puntuaciones según el compound score
         for i, sentimiento in st.session_state.reacciones.items():
-            compound = sentimiento['compound']
-
+            compound = sentimiento['sentimiento']['compound']
             if i in [0, 5]:  # Ambiental (E)
                 e_scores.append(asignar_puntuacion(compound, "Ambiental"))
             elif i in [1, 6]:  # Social (S)
@@ -121,7 +116,6 @@ else:
                 g_scores.append(asignar_puntuacion(compound, "Gobernanza"))
             elif i in [3, 4, 8]:  # Riesgo (R)
                 r_scores.append(asignar_puntuacion(compound, "Riesgo"))
-
         # Calcular promedios
         if e_scores:
             puntuaciones["Ambiental"] = round(sum(e_scores) / len(e_scores))
@@ -131,33 +125,29 @@ else:
             puntuaciones["Gobernanza"] = round(sum(g_scores) / len(g_scores))
         if r_scores:
             puntuaciones["Riesgo"] = round(sum(r_scores) / len(r_scores))
-
     # Mostrar resultados
     st.write("**Perfil del Inversor:**")
     for categoria, puntaje in puntuaciones.items():
         st.write(f"{categoria}: {puntaje}")
-
     # Graficar
     fig, ax = plt.subplots()
     ax.bar(puntuaciones.keys(), puntuaciones.values(), color=['green', 'blue', 'purple', 'red'])
     ax.set_ylabel("Puntuación (0-100)")
     ax.set_title("Perfil del Inversor")
     st.pyplot(fig)
-
- # Guardar en Google Sheets
-
-try:
-    creds_json_str = st.secrets["gcp_service_account"]
-    creds_json = json.loads(creds_json_str)
-    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
-    client = gspread.authorize(creds)
-    sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
-    fila = [puntuaciones.get(cat, 50) for cat in ["Ambiental", "Social", "Gobernanza", "Riesgo"]]
-    # Añadir las reacciones a la fila
-    reacciones_lista = [st.session_state.reacciones.get(i, {}).get('compound', 'Sin reacción') for i in range(len(noticias))]
-    fila.extend(reacciones_lista)
-    sheet.append_row(fila)
-    st.success("Respuestas y perfil guardados en Google Sheets.")
-except Exception as e:
-    st.error(f"Error al guardar en Google Sheets: {e}")
+    # Guardar en Google Sheets
+    try:
+        creds_json_str = st.secrets["gcp_service_account"]
+        creds_json = json.loads(creds_json_str)
+        scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
+        client = gspread.authorize(creds)
+        sheet = client.open('BBDD_RESPUESTAS').get_worksheet(1)
+        fila = [puntuaciones.get(cat, 50) for cat in ["Ambiental", "Social", "Gobernanza", "Riesgo"]]
+        # Añadir las reacciones (texto completo) a la fila
+        reacciones_lista = [st.session_state.reacciones.get(i, {}).get('texto', 'Sin reacción') for i in range(len(noticias))]
+        fila.extend(reacciones_lista)
+        sheet.append_row(fila)
+        st.success("Respuestas y perfil guardados en Google Sheets.")
+    except Exception as e:
+        st.error(f"Error al guardar en Google Sheets: {e}")
