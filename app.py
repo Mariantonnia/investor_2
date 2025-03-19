@@ -147,37 +147,32 @@ else:
     # Guardar en Google Sheets
   
 try:
-    # Cargar credenciales de Google Sheets
-    creds_json_str = st.secrets["gcp_service_account"]
-    creds_json = json.loads(creds_json_str)
-except Exception as e:
-    st.error(f"Error al cargar las credenciales: {e}")
-    st.stop()
+        # Cargar credenciales de Google Sheets
+        creds_json_str = st.secrets["gcp_service_account"]
+        creds_json = json.loads(creds_json_str)
+    except Exception as e:
+        st.error(f"Error al cargar las credenciales: {e}")
+        st.stop()
+    
+    # Autorización con Google Sheets
+    scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
+    client = gspread.authorize(creds)
+    
+    # Abrir la hoja de cálculo
+    sheet = client.open('BBDD_RESPUESTAS').sheet1
 
-# Autorización con Google Sheets
-scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_json, scope)
-client = gspread.authorize(creds)
-
-# Abrir la hoja de cálculo
-sheet = client.open('BBDD_RESPUESTAS').sheet1
-
-# Construir la fila con los valores de compound de cada reacción
-fila_reacciones = [st.session_state.reacciones[i]["compound"] for i in sorted(st.session_state.reacciones.keys())]
-
-# Agregar las puntuaciones al final
-fila_reacciones.extend([
-    puntuaciones["Ambiental"],
-    puntuaciones["Social"],
-    puntuaciones["Gobernanza"],
-    puntuaciones["Riesgo"]
-])
-
-# Agregar la fila a Google Sheets
-sheet.append_row(fila_reacciones)
-
-st.success("Respuestas y perfil guardados en Google Sheets en una misma fila.")
-
+    
+    # Construir una sola fila con todas las respuestas
+    fila = st.session_state.reacciones  # Solo guardar las reacciones
+    
+    # Agregar las puntuaciones al final
+    fila.extend([
+        puntuaciones["Ambiental"],
+        puntuaciones["Social"],
+        puntuaciones["Gobernanza"],
+        puntuaciones["Riesgo"]
+    ])
     
     # Agregar la fila a Google Sheets
     sheet.append_row(fila)
