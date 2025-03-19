@@ -15,9 +15,54 @@ analyzer = SentimentIntensityAnalyzer()
 def obtener_sentimiento(texto):
     return analyzer.polarity_scores(texto)
 
-def normalizar_puntuacion(compound):
-    """Normaliza el compound score de -1 a 1 a una escala de 0 a 100."""
-    return (compound + 1) * 50
+def asignar_puntuacion(compound, categoria):
+    """Asigna puntuaciones basadas en el compound score y la categoría."""
+    if categoria in ["Ambiental", "Gobernanza", "Riesgo"]:
+        if compound <= -0.1:
+            return 100
+        elif compound <= -0.09:
+            return 90
+        elif compound <= -0.08:
+            return 80
+        elif compound <= -0.07:
+            return 70
+        elif compound <= -0.06:
+            return 60
+        elif compound <= -0.05:
+            return 50
+        elif compound <= -0.04:
+            return 40
+        elif compound <= -0.03:
+            return 30
+        elif compound <= -0.02:
+            return 20
+        elif compound <= -0.01:
+            return 10
+        else:
+            return 0
+    elif categoria == "Social":
+        if compound >= 0.1:
+            return 100
+        elif compound >= 0.09:
+            return 90
+        elif compound >= 0.08:
+            return 80
+        elif compound >= 0.07:
+            return 70
+        elif compound >= 0.06:
+            return 60
+        elif compound >= 0.05:
+            return 50
+        elif compound >= 0.04:
+            return 40
+        elif compound >= 0.03:
+            return 30
+        elif compound >= 0.02:
+            return 20
+        elif compound >= 0.01:
+            return 10
+        else:
+            return 0
 
 # Noticias
 noticias = [
@@ -69,23 +114,23 @@ else:
             compound = sentimiento['compound']
 
             if i in [0, 5]:  # Ambiental (E)
-                e_scores.append(100 - normalizar_puntuacion(compound))
+                e_scores.append(asignar_puntuacion(compound, "Ambiental"))
             elif i in [1, 6]:  # Social (S)
-                s_scores.append(normalizar_puntuacion(compound))
+                s_scores.append(asignar_puntuacion(compound, "Social"))
             elif i in [2, 7]:  # Gobernanza (G)
-                g_scores.append(100 - normalizar_puntuacion(compound))
+                g_scores.append(asignar_puntuacion(compound, "Gobernanza"))
             elif i in [3, 4, 8]:  # Riesgo (R)
-                r_scores.append(100 - normalizar_puntuacion(compound))
+                r_scores.append(asignar_puntuacion(compound, "Riesgo"))
 
-        # Normalizar, redondear y limitar valores entre 0 y 100
+        # Calcular promedios
         if e_scores:
-            puntuaciones["Ambiental"] = max(0, min(100, round(sum(e_scores) / len(e_scores))))
+            puntuaciones["Ambiental"] = round(sum(e_scores) / len(e_scores))
         if s_scores:
-            puntuaciones["Social"] = max(0, min(100, round(sum(s_scores) / len(s_scores))))
+            puntuaciones["Social"] = round(sum(s_scores) / len(s_scores))
         if g_scores:
-            puntuaciones["Gobernanza"] = max(0, min(100, round(sum(g_scores) / len(g_scores))))
+            puntuaciones["Gobernanza"] = round(sum(g_scores) / len(g_scores))
         if r_scores:
-            puntuaciones["Riesgo"] = max(0, min(100, round(sum(r_scores) / len(r_scores))))
+            puntuaciones["Riesgo"] = round(sum(r_scores) / len(r_scores))
 
     # Mostrar resultados
     st.write("**Perfil del Inversor:**")
